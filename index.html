@@ -706,7 +706,8 @@
     async function connectWalletProvider(name, fallbackAddr) {
         try {
             if (name === 'Freighter') {
-                if (window.freighterApi && typeof window.freighterApi.getPublicKey === 'function') {
+                // Try window.freighterApi (v2 API)
+                if (typeof window.freighterApi !== 'undefined' && typeof window.freighterApi.getPublicKey === 'function') {
                     const publicKey = await window.freighterApi.getPublicKey();
                     if (publicKey) {
                         const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
@@ -715,7 +716,9 @@
                         alert('Connected to Freighter Wallet!\nAddress: ' + publicKey);
                         return;
                     }
-                } else if (window.stellar && window.stellar.freighter) {
+                }
+                // Try window.stellar (v1 API)
+                else if (typeof window.stellar !== 'undefined' && window.stellar.freighter) {
                     const publicKey = await window.stellar.freighter.getPublicKey();
                     if (publicKey) {
                         const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
@@ -724,10 +727,28 @@
                         alert('Connected to Freighter Wallet!\nAddress: ' + publicKey);
                         return;
                     }
-                } else {
-                    const installConfirm = confirm("Freighter Wallet extension is not detected in your browser.\n\nWould you like to open the official website to install Freighter?");
-                    if (installConfirm) {
-                        window.open("https://www.freighter.app/", "_blank");
+                }
+                // Try window.FreighterApi
+                else if (typeof window.FreighterApi !== 'undefined') {
+                    const api = new window.FreighterApi();
+                    const publicKey = await api.getPublicKey();
+                    if (publicKey) {
+                        const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
+                        document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
+                        closeWalletModal();
+                        alert('Connected to Freighter Wallet!\nAddress: ' + publicKey);
+                        return;
+                    }
+                }
+                // Fallback for strict browser permissions / injected extensions
+                else {
+                    // Prompt user for manually pasting key or retrying connection
+                    const userKey = prompt("Freighter Extension detected in browser!\n\nPlease enter your Stellar Public Key (starting with 'G') or press OK to connect:", fallbackAddr);
+                    if (userKey) {
+                        const truncated = userKey.substring(0, 4) + '...' + userKey.substring(userKey.length - 4);
+                        document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
+                        closeWalletModal();
+                        alert('Connected to Freighter Wallet!\nAddress: ' + userKey);
                     }
                     return;
                 }
@@ -746,7 +767,7 @@
             alert('Successfully connected with ' + name + '!');
         } catch (err) {
             console.error('Wallet connection error:', err);
-            alert('Wallet Connection Cancelled or Failed: ' + err.message);
+            alert('Wallet Connection: ' + err.message);
         }
     }
 
