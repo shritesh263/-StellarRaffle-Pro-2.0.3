@@ -118,6 +118,77 @@ Our platform integrates authentic community feedback from our **52 verified Stel
 
 ---
 
+## 📸 High-Fidelity UI Screenshots Gallery
+
+> [!TIP]
+> ### ✨ **Visual Interface Showcase — 10-Screen Integrated Glassmorphism Platform**
+> Below are the official high-resolution screenshots capturing key modules, wallet connections, transaction flows, and mobile responsive design.
+
+<br/>
+
+### 🌌 1. Grand Lobby & Hero Mega Draw
+![Grand Lobby](./SCREENSHOT/SUI-1.png)
+*Live Global Mega Draw countdown, infinite Soroban network status ticker, and trending raffle pools.*
+
+<br/>
+
+### 🎰 2. Drawing Room & Live Odds Engine
+![Drawing Room](./SCREENSHOT/SUI-2.png)
+*Real-time participant feed (52 testnet users), dynamic odds calculator, and smart contract audit panel.*
+
+<br/>
+
+### 🎟️ 3. Ticket Booth & Slide-to-Confirm Purchase
+![Ticket Booth](./SCREENSHOT/SUI-3.png)
+*Fast quantity selector (1, 5, 10, 50, MAX), custom asset picker, and interactive purchase slider.*
+
+<br/>
+
+### 💱 4. Asset Exchange & XLM/USDC Trading
+![Asset Exchange](./SCREENSHOT/SUI-4.png)
+*Token swap interface with rate calculators, flip direction toggles, and SVG trend charts.*
+
+<br/>
+
+### 🏆 5. Winner's Circle & Win Card Generator
+![Winner's Circle](./SCREENSHOT/SUI-5.png)
+*Hall of Fame leaderboard, verified on-chain draw history, and custom shareable win-card generator.*
+
+<br/>
+
+### 💼 6. My Vault & Security Permissions
+![My Vault](./SCREENSHOT/SUI-6.png)
+*Vault balance tracking in XLM/USD, withdrawal request workflow, and Soroban permission switches.*
+
+<br/>
+
+### 👛 7. Universal 8-Wallet Connectivity Modal
+![Wallet Connection](./SCREENSHOT/SUI-7.png)
+*Native integration for Freighter, Albedo, xBull, Rabet, WalletConnect, Lobstr, Hana Wallet, and LOBSTR Mobile.*
+
+<br/>
+
+### ⚙️ 8. Token Selector & Swap Settings Modals
+<div align="center">
+  <img src="./SCREENSHOT/SUI-8.png" width="48%" alt="Token Selection Modal" />
+  <img src="./SCREENSHOT/SUI-9.png" width="48%" alt="Swap Settings Modal" />
+  <p><em>Asset Selection Overlay & Slippage / Deadline Settings Modals</em></p>
+</div>
+
+<br/>
+
+### 📱 9. Mobile Responsive View & On-Chain Audit Feed
+<div align="center">
+  <img src="./SCREENSHOT/Screenshot_20260727_225837_Chrome.jpg" width="30%" alt="Mobile Navigation" />
+  <img src="./SCREENSHOT/Screenshot_20260727_225844_Chrome.jpg" width="30%" alt="Mobile Drawing Room" />
+  <img src="./SCREENSHOT/Screenshot_20260727_225847_Chrome.jpg" width="30%" alt="Mobile Vault" />
+  <p><em>Mobile Responsive UI & On-Chain Audit Navigation</em></p>
+</div>
+
+<br/>
+
+---
+
 ## 🛠️ Technology Stack
 
 * **Blockchain Platform**: [Stellar Network](https://stellar.org)
