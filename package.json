@@ -1,0 +1,9 @@
+{
+  "name": "stellar-mvp-root",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@stellar/stellar-sdk": "^15.0.1",
+    "node-fetch": "^3.3.2"
+  }
+}

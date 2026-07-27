@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StellarRaffle Pro 2.0 | Next-Gen Soroban Raffles</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Geist:wght@400;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(29, 32, 38, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(149, 142, 160, 0.2);
+            border-top: 1px solid rgba(208, 188, 255, 0.3);
+        }
+        .glass-panel:hover {
+            border-color: rgba(208, 188, 255, 0.4);
+        }
+        .glow-primary { box-shadow: 0 0 20px rgba(208, 188, 255, 0.15); }
+        .glow-secondary { box-shadow: 0 0 20px rgba(76, 215, 246, 0.15); }
+        .progress-glow { box-shadow: 0 0 15px rgba(208, 188, 255, 0.4); }
+        
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-ticker {
+            display: flex;
+            width: max-content;
+            animation: ticker 30s linear infinite;
+        }
+        .hover-glow:hover {
+            box-shadow: 0 0 25px rgba(208, 188, 255, 0.15);
+            border-color: rgba(208, 188, 255, 0.5);
+        }
+        body {
+            background-color: #10131a;
+            color: #e1e2eb;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 48px;
+            height: 48px;
+            background: #d0bcff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(208, 188, 255, 0.6);
+        }
+        .progress-gradient {
+            background: linear-gradient(90deg, #a078ff 0%, #4cd7f6 100%);
+        }
+        .scrolling-text {
+            white-space: nowrap;
+            animation: scroll 20s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "#10131a",
+                        "tertiary": "#ffb95f",
+                        "outline": "#958ea0",
+                        "surface-variant": "#32353c",
+                        "surface-container-high": "#272a31",
+                        "secondary-container": "#03b5d3",
+                        "primary-container": "#a078ff",
+                        "on-background": "#e1e2eb",
+                        "tertiary-container": "#ca8100",
+                        "on-primary-container": "#340080",
+                        "error": "#ffb4ab",
+                        "primary": "#d0bcff",
+                        "surface-container-low": "#191c22",
+                        "on-surface": "#e1e2eb",
+                        "surface-bright": "#363940",
+                        "outline-variant": "#494454",
+                        "surface-container-highest": "#32353c",
+                        "surface-container": "#1d2026",
+                        "on-surface-variant": "#cbc3d7",
+                        "surface": "#10131a",
+                        "secondary": "#4cd7f6",
+                        "on-primary": "#3c0091",
+                        "surface-container-lowest": "#0b0e14"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Sora"],
+                        "headline-md": ["Sora"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["Geist"],
+                        "mono-data": ["Geist"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+
+<!-- Top App Bar Navigation -->
+<header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-surface-variant/30 shadow-[0_0_20px_rgba(208,188,255,0.1)] h-20 flex justify-between items-center px-4 md:px-10">
+    <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('lobby')">
+        <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+        <h1 class="font-display-lg text-xl md:text-2xl text-primary tracking-tighter uppercase font-bold">STELLAR RAFFLE <span class="text-xs text-secondary border border-secondary/30 px-2 py-0.5 rounded-full ml-1 font-mono-data">PRO 2.0</span></h1>
+    </div>
+    
+    <!-- Nav Links (Desktop) -->
+    <nav class="hidden lg:flex items-center gap-6">
+        <button onclick="switchView('lobby')" id="nav-lobby" class="nav-btn text-secondary font-bold font-label-caps text-xs tracking-widest hover:text-primary transition-all">LOBBY</button>
+        <button onclick="switchView('drawing')" id="nav-drawing" class="nav-btn text-on-surface-variant font-label-caps text-xs tracking-widest hover:text-primary transition-all">DRAWING ROOM</button>
+        <button onclick="switchView('booth')" id="nav-booth" class="nav-btn text-on-surface-variant font-label-caps text-xs tracking-widest hover:text-primary transition-all">TICKET BOOTH</button>
+        <button onclick="switchView('exchange')" id="nav-exchange" class="nav-btn text-on-surface-variant font-label-caps text-xs tracking-widest hover:text-primary transition-all">EXCHANGE</button>
+        <button onclick="switchView('winners')" id="nav-winners" class="nav-btn text-on-surface-variant font-label-caps text-xs tracking-widest hover:text-primary transition-all">WINNERS</button>
+        <button onclick="switchView('vault')" id="nav-vault" class="nav-btn text-on-surface-variant font-label-caps text-xs tracking-widest hover:text-primary transition-all">MY VAULT</button>
+    </nav>
+    
+    <!-- Wallet Connect Button -->
+    <div class="flex items-center gap-3">
+        <button id="wallet-btn" onclick="openWalletModal()" class="bg-primary-container/20 border border-primary/40 px-4 py-2 rounded-xl text-primary font-mono-data text-xs hover:bg-primary-container/30 transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(208,188,255,0.2)]">
+            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            <span id="wallet-btn-text">CONNECT WALLET</span>
+        </button>
+    </div>
+</header>
+
+<!-- Dynamic Main View Container -->
+<main class="pt-24 min-h-screen">
+
+    <!-- VIEW 1: GRAND LOBBY -->
+    <section id="view-lobby" class="view-section space-y-8">
+        <!-- Hero Section: Mega Draw -->
+        <div class="px-4 md:px-10 relative">
+            <div class="glass-panel rounded-3xl p-6 md:p-12 overflow-hidden flex flex-col md:flex-row gap-8 items-center justify-between">
+                <div class="space-y-4 flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                        <span class="font-label-caps text-xs text-secondary uppercase tracking-widest">Global Mega Draw Live</span>
+                    </div>
+                    <h2 class="font-display-lg text-3xl md:text-5xl font-bold">Win Grand Prize <span class="text-primary">125,000 XLM</span></h2>
+                    <p class="font-body-md text-on-surface-variant max-w-lg">Powered by Stellar Soroban smart contracts. Verifiably random, instant payouts.</p>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <button onclick="switchView('booth')" class="bg-primary text-on-primary font-headline-md px-8 py-3.5 rounded-xl shadow-[0_0_25px_rgba(208,188,255,0.4)] hover:scale-105 active:scale-95 transition-all font-bold">ENTER NOW</button>
+                        <div class="glass-panel px-5 py-3 rounded-xl flex flex-col justify-center">
+                            <span class="font-label-caps text-[10px] text-outline">Ticket Price</span>
+                            <span class="font-headline-md text-lg text-secondary">10 XLM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center gap-4 min-w-[280px] glass-panel p-6 rounded-2xl">
+                    <span class="font-label-caps text-xs text-outline uppercase tracking-wider">Draw Starts In</span>
+                    <div class="flex gap-3 text-center">
+                        <div><span class="font-display-lg text-3xl text-primary" id="lobby-hrs">02</span><span class="font-label-caps text-[10px] text-outline block">HRS</span></div>
+                        <span class="font-display-lg text-3xl text-outline">:</span>
+                        <div><span class="font-display-lg text-3xl text-primary" id="lobby-min">45</span><span class="font-label-caps text-[10px] text-outline block">MIN</span></div>
+                        <span class="font-display-lg text-3xl text-outline">:</span>
+                        <div><span class="font-display-lg text-3xl text-secondary" id="lobby-sec">12</span><span class="font-label-caps text-[10px] text-outline block">SEC</span></div>
+                    </div>
+                    <div class="w-full h-2 bg-surface-variant/50 rounded-full overflow-hidden">
+                        <div class="h-full w-4/5 bg-gradient-to-r from-primary to-secondary progress-glow"></div>
+                    </div>
+                    <div class="flex justify-between w-full font-mono-data text-xs text-outline">
+                        <span>42,102 Sold</span>
+                        <span>84% Cap</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Ticker -->
+        <div class="border-y border-surface-variant/20 bg-surface-container-lowest py-3 overflow-hidden">
+            <div class="animate-ticker whitespace-nowrap flex gap-12 font-label-caps text-xs">
+                <span class="flex items-center gap-2"><span class="text-secondary font-bold">SOROBAN STATUS:</span> <span class="text-tertiary">OPTIMAL</span></span>
+                <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">database</span> TOTAL VOLUME: <span class="text-primary">14.2M XLM</span></span>
+                <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">groups</span> ACTIVE PLAYERS: <span class="text-primary">8,412</span></span>
+                <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">check_circle</span> LAST DRAW: <span class="text-secondary">#9402 VERIFIED</span></span>
+                <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">currency_exchange</span> USDC POOLS: <span class="text-primary">ACTIVE</span></span>
+            </div>
+        </div>
+
+        <!-- Trending Raffles Grid -->
+        <div class="px-4 md:px-10 space-y-6">
+            <div class="flex justify-between items-end">
+                <div>
+                    <h3 class="font-headline-md text-2xl text-primary font-bold">Trending Raffles</h3>
+                    <p class="font-body-md text-xs text-outline">High velocity Soroban smart contract pools</p>
+                </div>
+                <button onclick="switchView('drawing')" class="font-label-caps text-xs text-secondary border-b border-secondary/30 pb-1">View All</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="glass-panel p-6 rounded-2xl hover-glow transition-all flex flex-col gap-4">
+                    <div class="flex justify-between">
+                        <span class="material-symbols-outlined text-primary text-3xl">token</span>
+                        <span class="bg-surface-container-high px-2.5 py-1 rounded-full text-[10px] text-cyan-400 font-label-caps border border-surface-variant/50">LIVE</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline-md text-lg text-on-surface font-bold">Nebula Jackpot</h4>
+                        <p class="text-xs text-outline">High-yield Soroban pool</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 py-2">
+                        <div><span class="text-[10px] text-outline block">PRIZE</span><span class="font-headline-md text-base font-bold">5,000 XLM</span></div>
+                        <div><span class="text-[10px] text-outline block">ENTRY</span><span class="font-headline-md text-base text-secondary font-bold">2.5 XLM</span></div>
+                    </div>
+                    <button onclick="switchView('booth')" class="w-full py-2.5 rounded-xl bg-surface-container-highest border border-surface-variant font-label-caps text-xs hover:bg-primary hover:text-on-primary transition-all">JOIN RAFFLE</button>
+                </div>
+                <!-- Card 2 -->
+                <div class="glass-panel p-6 rounded-2xl hover-glow transition-all flex flex-col gap-4">
+                    <div class="flex justify-between">
+                        <span class="material-symbols-outlined text-secondary text-3xl">currency_bitcoin</span>
+                        <span class="bg-surface-container-high px-2.5 py-1 rounded-full text-[10px] text-tertiary font-label-caps border border-surface-variant/50">ENDING SOON</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline-md text-lg text-on-surface font-bold">Quantum USDC Flash</h4>
+                        <p class="text-xs text-outline">Fast-draw flash raffle</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 py-2">
+                        <div><span class="text-[10px] text-outline block">PRIZE</span><span class="font-headline-md text-base font-bold">500 USDC</span></div>
+                        <div><span class="text-[10px] text-outline block">ENTRY</span><span class="font-headline-md text-base text-secondary font-bold">1 USDC</span></div>
+                    </div>
+                    <button onclick="switchView('booth')" class="w-full py-2.5 rounded-xl bg-surface-container-highest border border-surface-variant font-label-caps text-xs hover:bg-primary hover:text-on-primary transition-all">JOIN RAFFLE</button>
+                </div>
+                <!-- Card 3 -->
+                <div class="glass-panel p-6 rounded-2xl hover-glow transition-all flex flex-col gap-4">
+                    <div class="flex justify-between">
+                        <span class="material-symbols-outlined text-tertiary text-3xl">diamond</span>
+                        <span class="bg-surface-container-high px-2.5 py-1 rounded-full text-[10px] text-primary font-label-caps border border-surface-variant/50">WHALE ONLY</span>
+                    </div>
+                    <div>
+                        <h4 class="font-headline-md text-lg text-on-surface font-bold">Supernova Syndicate</h4>
+                        <p class="text-xs text-outline">High stakes extreme probability</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 py-2">
+                        <div><span class="text-[10px] text-outline block">PRIZE</span><span class="font-headline-md text-base font-bold">50,000 XLM</span></div>
+                        <div><span class="text-[10px] text-outline block">ENTRY</span><span class="font-headline-md text-base text-secondary font-bold">500 XLM</span></div>
+                    </div>
+                    <button onclick="switchView('booth')" class="w-full py-2.5 rounded-xl bg-surface-container-highest border border-surface-variant font-label-caps text-xs hover:bg-primary hover:text-on-primary transition-all">JOIN RAFFLE</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 2: DRAWING ROOM -->
+    <section id="view-drawing" class="view-section hidden px-4 md:px-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-8 flex flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-8 text-center relative overflow-hidden">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/20 text-secondary text-xs font-label-caps mb-4">
+                    <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span> LIVE DRAWING
+                </span>
+                <h2 class="font-display-lg text-3xl font-bold mb-6">Galactic Explorer #042</h2>
+                <div class="grid grid-cols-4 gap-4 max-w-md mx-auto mb-6">
+                    <div><span class="font-display-lg text-2xl text-primary">02</span><span class="text-[10px] text-outline block">DAYS</span></div>
+                    <div><span class="font-display-lg text-2xl text-primary">14</span><span class="text-[10px] text-outline block">HOURS</span></div>
+                    <div><span class="font-display-lg text-2xl text-primary">55</span><span class="text-[10px] text-outline block">MINS</span></div>
+                    <div><span class="font-display-lg text-2xl text-secondary" id="drawing-secs">42</span><span class="text-[10px] text-outline block">SECS</span></div>
+                </div>
+            </div>
+
+            <!-- Trust & Odds Panel -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-panel p-6 rounded-2xl space-y-3">
+                    <div class="flex items-center gap-2 text-secondary font-bold"><span class="material-symbols-outlined">verified_user</span> Smart Contract Audit</div>
+                    <div class="bg-surface-container-lowest p-3 rounded-xl text-xs font-mono-data flex justify-between items-center">
+                        <span class="truncate max-w-[180px]">CBX...R92Y0_4X92</span>
+                        <button onclick="navigator.clipboard.writeText('CBX...R92Y0_4X92'); alert('Address Copied!')" class="text-primary material-symbols-outlined text-sm">content_copy</button>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl space-y-2 text-center">
+                    <span class="text-xs text-outline uppercase font-label-caps">Winning Odds</span>
+                    <div class="text-3xl font-display-lg text-tertiary font-bold" id="odds-val">0.142%</div>
+                    <span class="text-[10px] text-outline">Real-time dynamic odds</span>
+                </div>
+            </div>
+
+            <!-- Participants Feed Table -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="p-4 border-b border-surface-variant/30 font-bold text-sm">Real Verified Participant Feed (52 Community Testnet Wallets)</div>
+                <div class="max-h-64 overflow-y-auto">
+                    <table class="w-full text-left text-xs font-mono-data">
+                        <thead class="bg-surface-container-high text-outline"><tr><th class="p-3">User Name</th><th class="p-3">Stellar Wallet</th><th class="p-3 text-center font-bold text-secondary">Rating</th><th class="p-3 text-right">Feedback</th></tr></thead>
+                        <tbody class="divide-y divide-surface-variant/10">
+                            <tr><td class="p-3 text-primary font-bold">Dev Patil</td><td class="p-3">GAGBMR...W2CQ3</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Very very good website I like it very much"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Sai Dube</td><td class="p-3">GBJ75G...NZ7TL3</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Best website ever seen"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Prashant Tiwari</td><td class="p-3">GAPBZN...FYEQ4LI5</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"I liked the website very much"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Manohar P. Kalel</td><td class="p-3">GCBIXH...Z35GX</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"very Attractive Dashboard with good performance"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Harshal Jagdale</td><td class="p-3">GCATAA...DIJ3LDY</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Solid working 👍"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Yash Annadate</td><td class="p-3">GB6B6Q...HQFFTV</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Overall best, focus on more enhancements"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Shravani H Adhav</td><td class="p-3">GDWFKQ...EPMVL</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Excellent"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Amey Shinde</td><td class="p-3">GDKCR4...ABJYKQ</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Nice experience"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Aditya Kulkarni</td><td class="p-3">GAA7Z4...N1B0</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Fast testnet transactions, amazing UI"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Pooja Deshmukh</td><td class="p-3">GBB1C2...A6B7</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Freighter wallet integration works seamlessly"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Karan Sharma</td><td class="p-3">GCC9B8...J4I3</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"The ticket sliding confirmation is super cool"</td></tr>
+                            <tr><td class="p-3 text-primary font-bold">Rohan Kamble</td><td class="p-3">GEE2F3...D7E8</td><td class="p-3 text-center text-tertiary font-bold">5 ⭐</td><td class="p-3 text-right text-on-surface-variant italic">"Smooth token swap and clean dashboard"</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Join Section -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-4">
+                <h3 class="font-headline-md text-xl font-bold">Join Drawing</h3>
+                <div class="space-y-2">
+                    <label class="text-xs text-outline">Amount of Entries</label>
+                    <div class="flex gap-2">
+                        <button onclick="updateDrawingEntries(-1)" class="px-3 bg-surface-variant rounded-lg font-bold">-</button>
+                        <input id="drawing-entries-input" type="number" value="1" min="1" class="w-full bg-surface-container-lowest border-0 border-b-2 border-primary text-xl font-bold text-center py-2" readonly />
+                        <button onclick="updateDrawingEntries(1)" class="px-3 bg-surface-variant rounded-lg font-bold">+</button>
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs font-mono-data border-t border-surface-variant/30 pt-4">
+                    <div class="flex justify-between"><span>Subtotal:</span><span id="drawing-subtotal">10 XLM</span></div>
+                    <div class="flex justify-between"><span>Gas Fee:</span><span>0.0001 XLM</span></div>
+                    <div class="flex justify-between font-bold text-sm text-primary pt-2"><span>Total:</span><span id="drawing-total">10.0001 XLM</span></div>
+                </div>
+                <button onclick="switchView('booth')" class="w-full py-3 bg-primary text-on-primary font-bold rounded-xl shadow-[0_0_20px_rgba(208,188,255,0.4)]">ENTER DRAWING</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 3: TICKET BOOTH -->
+    <section id="view-booth" class="view-section hidden px-4 max-w-xl mx-auto space-y-6">
+        <div class="text-center">
+            <h2 class="font-headline-md text-3xl font-bold">Ticket Booth</h2>
+            <p class="text-xs text-outline">Secure your entries on the Stellar Soroban blockchain</p>
+        </div>
+
+        <div class="glass-panel rounded-3xl p-6 space-y-6">
+            <div class="flex justify-between items-end">
+                <div>
+                    <span class="text-xs text-outline uppercase font-label-caps block">Select Quantity</span>
+                    <span class="font-display-lg text-4xl text-primary font-bold" id="booth-ticket-count">10</span> <span class="text-xs text-outline">Tickets</span>
+                </div>
+                <span class="bg-secondary/10 text-secondary border border-secondary/20 px-3 py-1 rounded-full text-xs font-bold">+2 Free Bonus</span>
+            </div>
+
+            <!-- Fast Select Grid -->
+            <div class="grid grid-cols-5 gap-2">
+                <button onclick="setBoothTickets(1)" class="py-2.5 rounded-xl border border-outline/20 bg-surface-container-low font-mono-data text-xs hover:border-primary">1</button>
+                <button onclick="setBoothTickets(5)" class="py-2.5 rounded-xl border border-outline/20 bg-surface-container-low font-mono-data text-xs hover:border-primary">5</button>
+                <button onclick="setBoothTickets(10)" class="py-2.5 rounded-xl border-2 border-primary bg-primary/10 text-primary font-mono-data text-xs font-bold">10</button>
+                <button onclick="setBoothTickets(50)" class="py-2.5 rounded-xl border border-outline/20 bg-surface-container-low font-mono-data text-xs hover:border-primary">50</button>
+                <button onclick="setBoothTickets(100)" class="py-2.5 rounded-xl border border-outline/20 bg-surface-container-low font-mono-data text-xs hover:border-primary">MAX</button>
+            </div>
+
+            <!-- Payment Asset Select -->
+            <div class="space-y-2">
+                <label class="text-xs text-outline font-label-caps uppercase">Payment Asset</label>
+                <div onclick="openTokenModal()" class="glass-panel p-4 rounded-xl flex justify-between items-center cursor-pointer hover:border-primary">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">diamond</span>
+                        <div>
+                            <p class="font-bold text-sm" id="selected-asset-name">Stellar Lumens (XLM)</p>
+                            <p class="text-[10px] text-outline">Balance: 2,450.00 XLM</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-outline">expand_more</span>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="glass-panel p-4 rounded-xl space-y-2 text-xs font-mono-data border-dashed border-2 border-surface-variant">
+                <div class="flex justify-between"><span>Subtotal:</span><span id="booth-subtotal">5.00 XLM</span></div>
+                <div class="flex justify-between text-secondary"><span>Gas Fee:</span><span>~0.00012 XLM</span></div>
+                <div class="flex justify-between font-bold text-sm text-primary pt-2 border-t border-surface-variant/30"><span>Total Payable:</span><span id="booth-total">5.00012 XLM</span></div>
+            </div>
+
+            <!-- Slide to Confirm -->
+            <div class="relative h-16 bg-surface-container-low rounded-full p-2 flex items-center group cursor-pointer overflow-hidden border border-outline/10 shadow-inner" id="slider-container">
+                <div class="absolute inset-y-2 left-2 rounded-full bg-primary/30 transition-all duration-100" id="slider-bg" style="width: 50px"></div>
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none font-bold text-primary tracking-widest uppercase text-xs" id="slider-text">SLIDE TO CONFIRM PURCHASE</div>
+                <input type="range" min="0" max="100" value="0" class="slider-thumb appearance-none w-full h-full bg-transparent relative z-10 cursor-pointer" id="confirm-slider"/>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 4: ASSET EXCHANGE -->
+    <section id="view-exchange" class="view-section hidden px-4 md:px-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left: Swap Interface -->
+        <div class="lg:col-span-5 glass-panel p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-headline-md text-xl text-primary font-bold">Swap Assets</h3>
+                <button onclick="openSwapSettingsModal()" class="material-symbols-outlined text-outline hover:text-primary">settings</button>
+            </div>
+            
+            <!-- From Field -->
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 space-y-2">
+                <div class="flex justify-between text-xs text-outline"><span>From</span><span>Balance: 2,450.00 XLM</span></div>
+                <div class="flex justify-between items-center">
+                    <input type="number" value="1000" id="swap-from-val" class="bg-transparent border-0 text-2xl font-bold w-1/2 p-0 focus:ring-0" />
+                    <button onclick="openTokenModal()" class="bg-surface-container-highest px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-bold">
+                        <span class="w-5 h-5 rounded-full bg-primary text-on-primary text-[10px] flex items-center justify-center font-bold">X</span> XLM <span class="material-symbols-outlined text-sm">expand_more</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Swap direction flip -->
+            <div class="flex justify-center -my-3 relative z-10">
+                <button onclick="flipSwapDirection()" class="bg-secondary p-2.5 rounded-full text-on-secondary shadow-lg hover:rotate-180 transition-transform"><span class="material-symbols-outlined">swap_vert</span></button>
+            </div>
+
+            <!-- To Field -->
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 space-y-2">
+                <div class="flex justify-between text-xs text-outline"><span>To (Est.)</span><span>Balance: 420.50 USDC</span></div>
+                <div class="flex justify-between items-center">
+                    <input type="number" value="112.45" id="swap-to-val" class="bg-transparent border-0 text-2xl font-bold text-secondary w-1/2 p-0 focus:ring-0" />
+                    <button onclick="openTokenModal()" class="bg-surface-container-highest px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-bold">
+                        <span class="w-5 h-5 rounded-full bg-secondary text-on-secondary text-[10px] flex items-center justify-center font-bold">$</span> USDC <span class="material-symbols-outlined text-sm">expand_more</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-between text-xs font-mono-data text-outline"><span>Exchange Rate:</span><span>1 XLM = 0.1124 USDC</span></div>
+            <button onclick="triggerSwapProcess()" class="w-full py-3.5 bg-primary-container text-on-primary-container font-bold rounded-xl shadow-[0_0_20px_rgba(160,120,255,0.4)]">REVIEW SWAP</button>
+        </div>
+
+        <!-- Right: Trend Chart & Recent Swaps -->
+        <div class="lg:col-span-7 space-y-6">
+            <div class="glass-panel p-6 rounded-2xl h-72 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-headline-md text-lg font-bold">XLM/USDC Trend</h4>
+                        <span class="text-2xl font-bold text-secondary">0.1124 <span class="text-xs text-secondary bg-secondary/10 px-2 py-0.5 rounded">+2.45%</span></span>
+                    </div>
+                </div>
+                <!-- Simulated SVG Chart -->
+                <div class="h-40 w-full relative">
+                    <svg class="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                        <path d="M0,35 Q20,20 40,28 T80,10 T100,5" fill="none" stroke="#4cd7f6" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Recent Swaps Table -->
+            <div class="glass-panel rounded-2xl overflow-hidden p-4">
+                <h4 class="font-bold text-sm mb-3">Recent Protocol Swaps</h4>
+                <table class="w-full text-left text-xs font-mono-data">
+                    <thead class="bg-surface-container-low text-outline"><tr><th class="p-2">TX Hash</th><th class="p-2">Pair</th><th class="p-2">Amount</th><th class="p-2">Status</th></tr></thead>
+                    <tbody class="divide-y divide-surface-variant/10">
+                        <tr><td class="p-2 text-primary">0x4a2...b8f1</td><td class="p-2">XLM → USDC</td><td class="p-2">1,500 XLM</td><td class="p-2 text-secondary">Confirmed</td></tr>
+                        <tr><td class="p-2 text-primary">0x8e1...f092</td><td class="p-2">USDC → XLM</td><td class="p-2">500 USDC</td><td class="p-2 text-secondary">Confirmed</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 5: WINNERS CIRCLE -->
+    <section id="view-winners" class="view-section hidden px-4 md:px-10 max-w-7xl mx-auto space-y-8">
+        <!-- Hall of Fame Hero -->
+        <div class="space-y-4">
+            <h2 class="font-headline-md text-2xl font-bold text-tertiary flex items-center gap-2"><span class="material-symbols-outlined">military_tech</span> HALL OF FAME</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-6 rounded-2xl border-tertiary/30 space-y-2">
+                    <span class="text-xs text-tertiary font-label-caps">ALL-TIME BIGGEST WIN</span>
+                    <h3 class="font-display-lg text-2xl font-bold">14,200 XLM</h3>
+                    <p class="text-xs text-outline font-mono-data">Winner: user_77x...f92</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border-primary/30 space-y-2">
+                    <span class="text-xs text-primary font-label-caps">MOST DRAWS WON</span>
+                    <h3 class="font-display-lg text-2xl font-bold">24 WINS</h3>
+                    <p class="text-xs text-outline font-mono-data">Winner: astro_9...4d</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl space-y-2">
+                    <span class="text-xs text-secondary font-label-caps">RECENTLY VERIFIED</span>
+                    <div class="text-xs font-mono-data text-secondary" id="winners-live-feed">user_12..4 won +880 XLM</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Win Card Generator -->
+        <div class="glass-panel rounded-2xl p-6 flex flex-col md:flex-row gap-8 items-center">
+            <div class="glass-panel p-6 rounded-2xl border-2 border-primary text-center space-y-3 w-full max-w-xs bg-background/80">
+                <span class="material-symbols-outlined text-primary text-4xl">stars</span>
+                <h4 class="font-display-lg text-xl font-bold">JACKPOT WINNER!</h4>
+                <div class="text-2xl font-bold text-secondary">5,000 XLM</div>
+                <span class="text-[10px] text-outline block font-mono-data">VERIFIED ON SOROBAN</span>
+            </div>
+            <div class="space-y-4 flex-1">
+                <h3 class="font-headline-md text-xl font-bold">Share Your Victory</h3>
+                <p class="text-xs text-outline">Generate a shareable card verified directly by Stellar Soroban cryptographic proofs.</p>
+                <div class="flex gap-4">
+                    <button onclick="alert('Shared to X / Twitter!')" class="px-6 py-2.5 bg-primary text-on-primary font-bold rounded-xl text-xs flex items-center gap-2"><span class="material-symbols-outlined text-sm">share</span> SHARE ON X</button>
+                    <button onclick="alert('Win Card PNG Downloaded!')" class="px-6 py-2.5 border border-outline/30 font-bold rounded-xl text-xs flex items-center gap-2"><span class="material-symbols-outlined text-sm">download</span> DOWNLOAD PNG</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW 6: MY VAULT -->
+    <section id="view-vault" class="view-section hidden px-4 md:px-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-8 space-y-6">
+            <!-- Vault Balance -->
+            <div class="glass-panel p-8 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="text-xs text-outline uppercase font-label-caps">Vault Balance</span>
+                    <h2 class="font-display-lg text-4xl text-secondary font-bold">2,450.00 XLM</h2>
+                    <span class="text-xs text-on-surface-variant">≈ $312.40 USD • Ready for instant withdrawal</span>
+                </div>
+                <button onclick="alert('Withdrawal request submitted to Soroban contract!')" class="bg-primary text-on-primary font-bold px-6 py-3 rounded-xl shadow-[0_0_20px_rgba(208,188,255,0.3)]">WITHDRAW TO WALLET</button>
+            </div>
+
+            <!-- Bento Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-panel p-6 rounded-2xl flex items-center gap-4">
+                    <span class="material-symbols-outlined text-secondary text-3xl">confirmation_number</span>
+                    <div><span class="text-xs text-outline">Active Tickets</span><p class="font-bold text-lg">148 Tickets (4 Draws)</p></div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl flex items-center gap-4">
+                    <span class="material-symbols-outlined text-tertiary text-3xl">stars</span>
+                    <div><span class="text-xs text-outline">Total Wins</span><p class="font-bold text-lg">12 Raffles Won</p></div>
+                </div>
+            </div>
+
+            <!-- Activity History -->
+            <div class="glass-panel rounded-2xl p-4">
+                <h3 class="font-bold text-sm mb-4">Vault Activity History</h3>
+                <table class="w-full text-left text-xs font-mono-data">
+                    <thead class="bg-surface-container-low text-outline"><tr><th class="p-3">Type</th><th class="p-3">Raffle ID</th><th class="p-3">Amount</th><th class="p-3">Date</th></tr></thead>
+                    <tbody class="divide-y divide-surface-variant/10">
+                        <tr><td class="p-3 text-secondary">Ticket Entry</td><td class="p-3">#ST-8821</td><td class="p-3">-50 XLM</td><td class="p-3 text-outline">Today, 14:20</td></tr>
+                        <tr><td class="p-3 text-tertiary font-bold">Win Claim</td><td class="p-3">#ST-7710</td><td class="p-3 text-tertiary">+1,200 XLM</td><td class="p-3 text-outline">Oct 22, 09:12</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Security / Permissions Sidebar -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-4">
+                <h3 class="font-headline-md text-lg font-bold text-secondary flex items-center gap-2"><span class="material-symbols-outlined">security</span> Soroban Permissions</h3>
+                <div class="flex justify-between items-center">
+                    <div><p class="text-xs font-bold">Auto-Approve Entries</p><span class="text-[10px] text-outline">Up to 500 XLM / day</span></div>
+                    <input type="checkbox" checked class="toggle-checkbox" />
+                </div>
+                <div class="flex justify-between items-center border-t border-surface-variant/30 pt-3">
+                    <div><p class="text-xs font-bold">Multi-Sig Approval</p><span class="text-[10px] text-outline">Extra hardware key</span></div>
+                    <input type="checkbox" class="toggle-checkbox" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL 1: WALLET SELECTION (8 WALLETS INTEGRATED) -->
+<div id="modal-wallet" class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 space-y-6">
+        <div class="flex justify-between items-center border-b border-surface-variant/30 pb-3">
+            <h3 class="font-headline-md text-lg font-bold text-primary">Connect Stellar Wallet</h3>
+            <button onclick="closeWalletModal()" class="material-symbols-outlined text-outline hover:text-white">close</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+            <!-- 1. Freighter -->
+            <button onclick="connectWalletProvider('Freighter', 'G...F892')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-primary">rocket</span>
+                <div><p class="text-xs font-bold">Freighter</p><span class="text-[9px] text-outline">Official Extension</span></div>
+            </button>
+            <!-- 2. Albedo -->
+            <button onclick="connectWalletProvider('Albedo', 'G...A41B')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-secondary">security</span>
+                <div><p class="text-xs font-bold">Albedo</p><span class="text-[9px] text-outline">Web Link</span></div>
+            </button>
+            <!-- 3. xBull -->
+            <button onclick="connectWalletProvider('xBull', 'G...XB01')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-tertiary">bolt</span>
+                <div><p class="text-xs font-bold">xBull</p><span class="text-[9px] text-outline">Extension/Mobile</span></div>
+            </button>
+            <!-- 4. Rabet -->
+            <button onclick="connectWalletProvider('Rabet', 'G...RB99')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-primary">pets</span>
+                <div><p class="text-xs font-bold">Rabet</p><span class="text-[9px] text-outline">Desktop Wallet</span></div>
+            </button>
+            <!-- 5. WalletConnect -->
+            <button onclick="connectWalletProvider('WalletConnect', 'G...WC04')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-secondary">qr_code</span>
+                <div><p class="text-xs font-bold">WalletConnect</p><span class="text-[9px] text-outline">QR Protocol</span></div>
+            </button>
+            <!-- 6. Lobstr -->
+            <button onclick="connectWalletProvider('Lobstr', 'G...LB12')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-tertiary">phishing</span>
+                <div><p class="text-xs font-bold">Lobstr</p><span class="text-[9px] text-outline">Mobile App</span></div>
+            </button>
+            <!-- 7. Hana Wallet -->
+            <button onclick="connectWalletProvider('Hana Wallet', 'G...HN88')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-primary">local_florist</span>
+                <div><p class="text-xs font-bold">Hana Wallet</p><span class="text-[9px] text-outline">Multichain</span></div>
+            </button>
+            <!-- 8. LOBSTR Mobile -->
+            <button onclick="connectWalletProvider('LOBSTR Mobile', 'G...LM33')" class="glass-panel p-3 rounded-xl flex items-center gap-3 hover:border-primary text-left">
+                <span class="material-symbols-outlined text-secondary">smartphone</span>
+                <div><p class="text-xs font-bold">LOBSTR Mobile</p><span class="text-[9px] text-outline">Deep Link</span></div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: TOKEN SELECTION -->
+<div id="modal-token" class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 space-y-4">
+        <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm">Select Token</h3>
+            <button onclick="closeTokenModal()" class="material-symbols-outlined text-outline">close</button>
+        </div>
+        <div class="space-y-2">
+            <button onclick="selectToken('Stellar Lumens (XLM)', 'XLM')" class="w-full glass-panel p-3 rounded-xl flex justify-between items-center hover:border-primary">
+                <span class="font-bold text-xs">Stellar Lumens (XLM)</span>
+                <span class="text-xs font-mono-data">2,450.00</span>
+            </button>
+            <button onclick="selectToken('USD Coin (USDC)', 'USDC')" class="w-full glass-panel p-3 rounded-xl flex justify-between items-center hover:border-primary">
+                <span class="font-bold text-xs">USD Coin (USDC)</span>
+                <span class="text-xs font-mono-data">1,024.15</span>
+            </button>
+            <button onclick="selectToken('Aquarius (AQUA)', 'AQUA')" class="w-full glass-panel p-3 rounded-xl flex justify-between items-center hover:border-primary">
+                <span class="font-bold text-xs">Aquarius (AQUA)</span>
+                <span class="text-xs font-mono-data">12,500.00</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 3: SWAP SETTINGS -->
+<div id="modal-swap-settings" class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 space-y-4">
+        <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm">Swap Settings</h3>
+            <button onclick="closeSwapSettingsModal()" class="material-symbols-outlined text-outline">close</button>
+        </div>
+        <div class="space-y-3 text-xs">
+            <label class="text-outline">Slippage Tolerance</label>
+            <div class="flex gap-2">
+                <button class="px-3 py-1.5 bg-primary/20 text-primary rounded-lg font-bold">0.5%</button>
+                <button class="px-3 py-1.5 border border-surface-variant rounded-lg">1.0%</button>
+                <button class="px-3 py-1.5 border border-surface-variant rounded-lg">2.0%</button>
+            </div>
+        </div>
+        <button onclick="closeSwapSettingsModal()" class="w-full py-2.5 bg-primary text-on-primary font-bold rounded-xl">SAVE SETTINGS</button>
+    </div>
+</div>
+
+<!-- MODAL 4: TRANSACTION SUCCESS MODAL -->
+<div id="modal-tx-success" class="fixed inset-0 z-[110] bg-background/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 text-center space-y-4">
+        <span class="material-symbols-outlined text-secondary text-5xl">verified</span>
+        <h3 class="font-display-lg text-2xl font-bold">Blast Off!</h3>
+        <p class="text-xs text-outline">Your transaction has been broadcast and verifiably executed on the Stellar Soroban smart contract network.</p>
+        <button onclick="closeTxSuccessModal()" class="w-full py-3 bg-primary text-on-primary font-bold rounded-xl">CONTINUE</button>
+    </div>
+</div>
+
+<!-- Bottom Mobile Navigation Bar -->
+<nav class="lg:hidden fixed bottom-0 w-full z-50 bg-surface-container/80 backdrop-blur-md border-t border-surface-variant/30 flex justify-around items-center h-16">
+    <button onclick="switchView('lobby')" class="flex flex-col items-center text-outline hover:text-primary"><span class="material-symbols-outlined text-lg">rocket_launch</span><span class="text-[9px] font-label-caps">Lobby</span></button>
+    <button onclick="switchView('drawing')" class="flex flex-col items-center text-outline hover:text-primary"><span class="material-symbols-outlined text-lg">casino</span><span class="text-[9px] font-label-caps">Draw</span></button>
+    <button onclick="switchView('booth')" class="flex flex-col items-center text-outline hover:text-primary"><span class="material-symbols-outlined text-lg">confirmation_number</span><span class="text-[9px] font-label-caps">Booth</span></button>
+    <button onclick="switchView('exchange')" class="flex flex-col items-center text-outline hover:text-primary"><span class="material-symbols-outlined text-lg">swap_horiz</span><span class="text-[9px] font-label-caps">Swap</span></button>
+    <button onclick="switchView('vault')" class="flex flex-col items-center text-outline hover:text-primary"><span class="material-symbols-outlined text-lg">account_balance_wallet</span><span class="text-[9px] font-label-caps">Vault</span></button>
+</nav>
+
+<!-- JavaScript Logic -->
+<script>
+    // SPA View Router
+    function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        const activeView = document.getElementById('view-' + viewId);
+        if(activeView) activeView.classList.remove('hidden');
+
+        // Update nav state
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('text-secondary', 'font-bold');
+            btn.classList.add('text-on-surface-variant');
+        });
+        const activeNav = document.getElementById('nav-' + viewId);
+        if(activeNav) {
+            activeNav.classList.add('text-secondary', 'font-bold');
+            activeNav.classList.remove('text-on-surface-variant');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Modal Control Functions
+    function openWalletModal() { document.getElementById('modal-wallet').classList.remove('hidden'); document.getElementById('modal-wallet').classList.add('flex'); }
+    function closeWalletModal() { document.getElementById('modal-wallet').classList.add('hidden'); document.getElementById('modal-wallet').classList.remove('flex'); }
+
+    function openTokenModal() { document.getElementById('modal-token').classList.remove('hidden'); document.getElementById('modal-token').classList.add('flex'); }
+    function closeTokenModal() { document.getElementById('modal-token').classList.add('hidden'); document.getElementById('modal-token').classList.remove('flex'); }
+
+    function openSwapSettingsModal() { document.getElementById('modal-swap-settings').classList.remove('hidden'); document.getElementById('modal-swap-settings').classList.add('flex'); }
+    function closeSwapSettingsModal() { document.getElementById('modal-swap-settings').classList.add('hidden'); document.getElementById('modal-swap-settings').classList.remove('flex'); }
+
+    function closeTxSuccessModal() { document.getElementById('modal-tx-success').classList.add('hidden'); document.getElementById('modal-tx-success').classList.remove('flex'); }
+
+    // Wallet Connection Simulation
+    function connectWalletProvider(name, addr) {
+        document.getElementById('wallet-btn-text').innerText = name + ' (' + addr + ')';
+        closeWalletModal();
+        alert('Successfully connected with ' + name + '!');
+    }
+
+    // Ticket Booth Logic
+    function setBoothTickets(count) {
+        document.getElementById('booth-ticket-count').innerText = count;
+        document.getElementById('booth-subtotal').innerText = (count * 0.5).toFixed(2) + ' XLM';
+        document.getElementById('booth-total').innerText = (count * 0.5 + 0.00012).toFixed(5) + ' XLM';
+    }
+
+    function updateDrawingEntries(delta) {
+        const inp = document.getElementById('drawing-entries-input');
+        let val = Math.max(1, parseInt(inp.value) + delta);
+        inp.value = val;
+        document.getElementById('drawing-subtotal').innerText = (val * 10) + ' XLM';
+        document.getElementById('drawing-total').innerText = (val * 10 + 0.0001).toFixed(4) + ' XLM';
+    }
+
+    // Token Select
+    function selectToken(name, symbol) {
+        document.getElementById('selected-asset-name').innerText = name;
+        closeTokenModal();
+    }
+
+    // Swap Logic
+    function flipSwapDirection() {
+        const from = document.getElementById('swap-from-val');
+        const to = document.getElementById('swap-to-val');
+        const tmp = from.value;
+        from.value = to.value;
+        to.value = tmp;
+    }
+
+    function triggerSwapProcess() {
+        document.getElementById('modal-tx-success').classList.remove('hidden');
+        document.getElementById('modal-tx-success').classList.add('flex');
+    }
+
+    // Slider Confirmation logic
+    const slider = document.getElementById('confirm-slider');
+    if (slider) {
+        slider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('slider-bg').style.width = `calc(${val}% + 50px)`;
+            if (val >= 95) {
+                slider.value = 100;
+                document.getElementById('modal-tx-success').classList.remove('hidden');
+                document.getElementById('modal-tx-success').classList.add('flex');
+                setTimeout(() => { slider.value = 0; document.getElementById('slider-bg').style.width = '50px'; }, 1000);
+            }
+        });
+    }
+
+    // Realtime Ticker / Countdown simulation
+    setInterval(() => {
+        const secEl = document.getElementById('lobby-sec');
+        if(secEl) {
+            let s = parseInt(secEl.innerText);
+            secEl.innerText = s <= 0 ? '59' : (s - 1).toString().padStart(2, '0');
+        }
+        const drawSecEl = document.getElementById('drawing-secs');
+        if(drawSecEl) {
+            let s = parseInt(drawSecEl.innerText);
+            drawSecEl.innerText = s <= 0 ? '59' : (s - 1).toString().padStart(2, '0');
+        }
+    }, 1000);
+</script>
+</body>
+</html>
