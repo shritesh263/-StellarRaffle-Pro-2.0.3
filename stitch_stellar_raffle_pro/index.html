@@ -705,52 +705,67 @@
 
     function closeTxSuccessModal() { document.getElementById('modal-tx-success').classList.add('hidden'); document.getElementById('modal-tx-success').classList.remove('flex'); }
 
-    // 100% Native Extension API Wallet Connector (No Prompts, No Fake Fallbacks)
+    // Official @stellar/freighter-api Asynchronous Detection & Permission Request Handler
+    async function checkFreighterInstalledWithRetry(retries = 10, delay = 200) {
+        for (let i = 0; i < retries; i++) {
+            const freighter = window.freighterApi || (window.stellar && window.stellar.freighter) || window.FreighterApi;
+            if (freighter) {
+                if (typeof freighter.isConnected === 'function') {
+                    const status = await freighter.isConnected();
+                    console.log(`[Freighter Audit] Attempt ${i + 1}: isConnected() returned:`, status);
+                    if (status && status.isConnected) return freighter;
+                    if (status === true) return freighter;
+                }
+                return freighter;
+            }
+            console.log(`[Freighter Audit] Attempt ${i + 1}: Extension object not injected yet, retrying in ${delay}ms...`);
+            await new Promise(r => setTimeout(r, delay));
+        }
+        return null;
+    }
+
     async function connectWalletProvider(name) {
         document.getElementById('wallet-btn-text').innerText = 'Connecting to ' + name + '...';
 
         try {
             if (name === 'Freighter') {
-                const freighter = window.freighterApi || (window.stellar && window.stellar.freighter) || window.FreighterApi;
-                
+                // Await async extension injection check
+                const freighter = await checkFreighterInstalledWithRetry();
+
                 if (!freighter) {
                     document.getElementById('wallet-btn-text').innerText = 'CONNECT WALLET';
-                    if (confirm("Freighter extension is not installed in your browser.\n\nWould you like to open https://www.freighter.app/ to install it now?")) {
+                    console.warn("[Freighter Audit] Result: Extension is NOT installed in browser.");
+                    if (confirm("Freighter extension was not detected in your browser.\n\nWould you like to open https://www.freighter.app/ to install it now?")) {
                         window.open("https://www.freighter.app/", "_blank");
                     }
                     return;
                 }
 
-                // 1. Check if connected / installed
-                if (typeof freighter.isConnected === 'function') {
-                    const connected = await freighter.isConnected();
-                    if (!connected && typeof freighter.isConnected === 'function') {
-                        document.getElementById('wallet-btn-text').innerText = 'CONNECT WALLET';
-                        alert("Freighter extension found but not unlocked or ready.");
-                    }
-                }
+                console.log("[Freighter Audit] Extension detected successfully. Triggering requestAccess()...");
 
-                // 2. Trigger real extension popup to request access
+                // Trigger real extension popup to request access
                 let publicKey = null;
                 if (typeof freighter.requestAccess === 'function') {
                     const res = await freighter.requestAccess();
+                    console.log("[Freighter Audit] Raw requestAccess() response:", res);
                     publicKey = typeof res === 'string' ? res : (res && res.address ? res.address : null);
                 }
                 
                 if (!publicKey && typeof freighter.getPublicKey === 'function') {
                     publicKey = await freighter.getPublicKey();
+                    console.log("[Freighter Audit] Raw getPublicKey() response:", publicKey);
                 }
 
                 if (!publicKey || typeof publicKey !== 'string' || !publicKey.startsWith('G')) {
                     throw new Error("User cancelled or rejected the Freighter connection request.");
                 }
 
-                // 3. Verify network (Testnet / Mainnet)
+                // Verify network (Testnet / Mainnet)
                 if (typeof freighter.getNetwork === 'function') {
                     try {
                         const net = await freighter.getNetwork();
-                        console.log("Freighter Connected Network:", net);
-                    } catch(e) { console.warn("Network check notice:", e); }
+                        console.log("[Freighter Audit] Connected Network:", net);
+                    } catch(e) { console.warn("[Freighter Audit] Network check warning:", e); }
                 }
 
                 const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
