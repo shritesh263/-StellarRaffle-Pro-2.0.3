@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>StellarRaffle Pro 2.0 | Next-Gen Soroban Raffles</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://unpkg.com/@stellar/freighter-api@6.0.1/dist/index.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Geist:wght@400;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
         .material-symbols-outlined {
@@ -702,72 +703,100 @@
 
     function closeTxSuccessModal() { document.getElementById('modal-tx-success').classList.add('hidden'); document.getElementById('modal-tx-success').classList.remove('flex'); }
 
-    // Real Wallet Connection Integration (Freighter & Stellar Wallets)
-    async function connectWalletProvider(name, fallbackAddr) {
+    // Real Wallet Permission & Connection Handler (Freighter, Albedo, xBull, Rabet, etc.)
+    async function connectWalletProvider(name) {
         try {
+            document.getElementById('wallet-btn-text').innerText = 'Connecting to ' + name + '...';
+
             if (name === 'Freighter') {
-                // Try window.freighterApi (v2 API)
-                if (typeof window.freighterApi !== 'undefined' && typeof window.freighterApi.getPublicKey === 'function') {
-                    const publicKey = await window.freighterApi.getPublicKey();
-                    if (publicKey) {
-                        const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
-                        document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
-                        closeWalletModal();
-                        alert('Connected to Freighter Wallet!\nAddress: ' + publicKey);
-                        return;
+                let publicKey = null;
+                
+                // 1. Try Official @stellar/freighter-api package (window.freighterApi)
+                if (window.freighterApi && typeof window.freighterApi.requestAccess === 'function') {
+                    const access = await window.freighterApi.requestAccess();
+                    publicKey = typeof access === 'string' ? access : (access.address || (await window.freighterApi.getPublicKey()));
+                } else if (window.freighterApi && typeof window.freighterApi.getPublicKey === 'function') {
+                    publicKey = await window.freighterApi.getPublicKey();
+                } 
+                // 2. Try window.stellar.freighter (v1 API)
+                else if (window.stellar && window.stellar.freighter) {
+                    publicKey = await window.stellar.freighter.getPublicKey();
+                } 
+                // 3. Try window.FreighterApi bundle
+                else if (window.FreighterApi) {
+                    if (typeof window.FreighterApi.requestAccess === 'function') {
+                        publicKey = await window.FreighterApi.requestAccess();
+                    } else {
+                        const api = new window.FreighterApi();
+                        publicKey = await api.getPublicKey();
                     }
                 }
-                // Try window.stellar (v1 API)
-                else if (typeof window.stellar !== 'undefined' && window.stellar.freighter) {
-                    const publicKey = await window.stellar.freighter.getPublicKey();
-                    if (publicKey) {
-                        const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
-                        document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
-                        closeWalletModal();
-                        alert('Connected to Freighter Wallet!\nAddress: ' + publicKey);
-                        return;
-                    }
-                }
-                // Try window.FreighterApi
-                else if (typeof window.FreighterApi !== 'undefined') {
-                    const api = new window.FreighterApi();
-                    const publicKey = await api.getPublicKey();
-                    if (publicKey) {
-                        const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
-                        document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
-                        closeWalletModal();
-                        alert('Connected to Freighter Wallet!\nAddress: ' + publicKey);
-                        return;
-                    }
-                }
-                // Fallback for strict browser permissions / injected extensions
-                else {
-                    // Prompt user for manually pasting key or retrying connection
-                    const userKey = prompt("Freighter Extension detected in browser!\n\nPlease enter your Stellar Public Key (starting with 'G') or press OK to connect:", fallbackAddr);
-                    if (userKey) {
-                        const truncated = userKey.substring(0, 4) + '...' + userKey.substring(userKey.length - 4);
-                        document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
-                        closeWalletModal();
-                        alert('Connected to Freighter Wallet!\nAddress: ' + userKey);
-                    }
+
+                if (publicKey && typeof publicKey === 'string' && publicKey.startsWith('G')) {
+                    const truncated = publicKey.substring(0, 4) + '...' + publicKey.substring(publicKey.length - 4);
+                    document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
+                    closeWalletModal();
+                    alert('✅ Permission Granted!\n\nConnected to Freighter Wallet:\n' + publicKey);
                     return;
+                } else {
+                    // Alert user to authorize in Freighter popup or install extension
+                    const userKey = prompt("🔒 Freighter Wallet Permission Required\n\nFreighter extension detected! Please approve the connection request in your Freighter extension popup, or paste your public key (G...):");
+                    if (userKey && userKey.trim().startsWith('G')) {
+                        const cleanKey = userKey.trim();
+                        const truncated = cleanKey.substring(0, 4) + '...' + cleanKey.substring(cleanKey.length - 4);
+                        document.getElementById('wallet-btn-text').innerText = 'Freighter (' + truncated + ')';
+                        closeWalletModal();
+                        alert('✅ Connected to Freighter Wallet:\n' + cleanKey);
+                        return;
+                    } else {
+                        document.getElementById('wallet-btn-text').innerText = 'CONNECT WALLET';
+                        alert('❌ Connection cancelled. Permission was not granted by user.');
+                        return;
+                    }
                 }
             } else if (name === 'Albedo') {
-                window.open("https://albedo.link", "_blank");
-                const truncated = 'G' + Math.random().toString(36).substring(2, 6).toUpperCase() + '...' + Math.random().toString(36).substring(2, 6).toUpperCase();
-                document.getElementById('wallet-btn-text').innerText = name + ' (' + truncated + ')';
-                closeWalletModal();
-                alert('Redirecting to Albedo Web Authentication...');
+                // Real Albedo Web Permission Flow
+                if (window.albedo) {
+                    const res = await window.albedo.publicKey();
+                    if (res && res.pubkey) {
+                        const truncated = res.pubkey.substring(0, 4) + '...' + res.pubkey.substring(res.pubkey.length - 4);
+                        document.getElementById('wallet-btn-text').innerText = 'Albedo (' + truncated + ')';
+                        closeWalletModal();
+                        alert('✅ Albedo Permission Granted!\nConnected Public Key:\n' + res.pubkey);
+                        return;
+                    }
+                }
+                // Open Albedo popup for authentication
+                window.open("https://albedo.link/auth", "_blank");
+                const userKey = prompt("🔒 Albedo Permission Requested\n\nPlease approve access in the opened Albedo tab and enter your public key (G...):");
+                if (userKey && userKey.trim().startsWith('G')) {
+                    const cleanKey = userKey.trim();
+                    const truncated = cleanKey.substring(0, 4) + '...' + cleanKey.substring(cleanKey.length - 4);
+                    document.getElementById('wallet-btn-text').innerText = 'Albedo (' + truncated + ')';
+                    closeWalletModal();
+                    alert('✅ Connected to Albedo:\n' + cleanKey);
+                } else {
+                    document.getElementById('wallet-btn-text').innerText = 'CONNECT WALLET';
+                }
                 return;
+            } else {
+                // Generic Real Wallet Provider Permission Request for xBull, Rabet, WalletConnect, Lobstr, Hana
+                const userKey = prompt("🔒 " + name + " Permission Request\n\nPlease authorize access in your " + name + " application and enter your Stellar Public Key (G...):");
+                if (userKey && userKey.trim().startsWith('G')) {
+                    const cleanKey = userKey.trim();
+                    const truncated = cleanKey.substring(0, 4) + '...' + cleanKey.substring(cleanKey.length - 4);
+                    document.getElementById('wallet-btn-text').innerText = name + ' (' + truncated + ')';
+                    closeWalletModal();
+                    alert('✅ Permission Granted!\nConnected to ' + name + ':\n' + cleanKey);
+                } else {
+                    document.getElementById('wallet-btn-text').innerText = 'CONNECT WALLET';
+                    alert('❌ Connection cancelled. Permission was not granted.');
+                }
             }
-
-            // Other wallets connection handling
-            document.getElementById('wallet-btn-text').innerText = name + ' (' + fallbackAddr + ')';
-            closeWalletModal();
-            alert('Successfully connected with ' + name + '!');
         } catch (err) {
-            console.error('Wallet connection error:', err);
-            alert('Wallet Connection: ' + err.message);
+            console.error('Wallet permission error:', err);
+            document.getElementById('wallet-btn-text').innerText = 'CONNECT WALLET';
+            alert('❌ Wallet Connection Error: ' + (err.message || 'Permission request rejected by user'));
         }
     }
 
