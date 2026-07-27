@@ -6,9 +6,17 @@
 [![Stellar](https://img.shields.io/badge/Blockchain-Stellar-000000?style=for-the-badge&logo=stellar&logoColor=white)](https://stellar.org)
 [![Soroban](https://img.shields.io/badge/Smart_Contract-Soroban-7B62EE?style=for-the-badge&logo=rust&logoColor=white)](https://soroban.stellar.org)
 [![TailwindCSS](https://img.shields.io/badge/Styling-Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Vite](https://img.shields.io/badge/Dev_Server-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Netlify Status](https://img.shields.io/badge/Netlify_Deployment-LIVE_NOW-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://ubiquitous-cactus-2ad118.netlify.app/)
 
 **StellarRaffle Pro 2.0** is a professional-grade, decentralized raffle & trading platform built natively on the **Stellar Soroban** network. Combining an immersive glassmorphism aesthetic with a highly-reactive on-chain backend, it delivers a secure, transparent, and visually stunning Web3 raffle and asset exchange experience.
+
+<br/>
+
+> [!IMPORTANT]
+> ### 🚀 **[CLICK HERE FOR LIVE NETLIFY DEPLOYMENT](https://ubiquitous-cactus-2ad118.netlify.app/)**
+> **`https://ubiquitous-cactus-2ad118.netlify.app/`**
+>
+> *100% Working, Zero-Downtime Live Production Build*
 
 <br/>
 
@@ -72,7 +80,7 @@ The platform merges **10 distinct Stitch UI designs** into a single seamless, ze
 | **👛 Multi-Wallet Adapter (8 Options)** | Freighter, Albedo, xBull, Rabet, WalletConnect, Lobstr, Hana, LOBSTR Mobile | ✅ 8 Wallets Integrated |
 | **📊 Product Presentation & Pitch Deck** | [Level 5 Pitch Deck (`PITCH_DECK.md`)](./PITCH_DECK.md) | ✅ Complete Slides |
 | **🎥 Product Demo & Video Walkthrough** | [Demo Script & User Flow (`DEMO_WALKTHROUGH.md`)](./DEMO_WALKTHROUGH.md) | ✅ Full Script & Guide |
-| **💻 Live Deployed Application** | [Vercel Production Deployment](https://stellar-raffle-pro-1.vercel.app/) | ✅ Live Online |
+| **💻 Live Deployed Application** | **[🚀 LIVE NETLIFY DEPLOYMENT LINK](https://ubiquitous-cactus-2ad118.netlify.app/)** | ✅ Live Online |
 | **🐙 Codebase & Commit History** | [Public GitHub Repository](https://github.com/shritesh263/StellarRaffle-Pro-2.0) | ✅ 95+ Commits |
 
 <br/>
